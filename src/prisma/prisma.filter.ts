@@ -12,6 +12,15 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
 
+    if (err instanceof PrismaClientKnownRequestError && err.code === 'P2021') {
+      const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+      return res.status(statusCode).json({
+        message: [`The table ${err?.meta.modelName} does not exist.`],
+        error: 'Internal Server Error',
+        statusCode,
+      });
+    }
+
     if (err instanceof PrismaClientKnownRequestError && err.code === 'P2025') {
       if (err?.meta.cause.includes('delete')) {
         return res.status(HttpStatus.OK).end();
