@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -7,10 +8,30 @@ import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  createUser(data: CreateUserDto): Promise<UserEntity> {
-    return this.prisma.user.create({ data });
+  createToken = (
+    user: Partial<UserEntity>,
+  ): Partial<UserEntity> & { token: string } => {
+    return {
+      ...user,
+      token: this.jwtService.sign({ ...user }),
+    };
+  };
+
+  createUser(params: {
+    data: CreateUserDto;
+    select?: Prisma.UserSelect;
+  }): Promise<Partial<UserEntity>> {
+    const { data, select } = params;
+
+    return this.prisma.user.create({
+      data,
+      select: { id: true, username: true, ...select },
+    });
   }
 
   findManyUser(): Promise<Omit<UserEntity, 'password'>[]> {
@@ -22,7 +43,7 @@ export class UsersService {
   findUniqueUser(params: {
     where: Prisma.UserWhereUniqueInput;
     select?: Prisma.UserSelect;
-  }): Promise<Omit<UserEntity, 'password'>> {
+  }): Promise<Partial<UserEntity>> {
     const { where, select } = params;
 
     return this.prisma.user.findUnique({

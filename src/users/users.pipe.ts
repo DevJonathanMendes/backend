@@ -3,7 +3,7 @@ import { isEmail } from 'class-validator';
 import { createHash } from 'crypto';
 
 @Injectable()
-export class AppPipeTransform implements PipeTransform {
+export class UsersPipeTransform implements PipeTransform {
   transform(data: Record<string, any>) {
     const sanitizedData: Record<string, any> = {};
 
