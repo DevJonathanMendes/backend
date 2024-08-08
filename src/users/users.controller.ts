@@ -63,7 +63,7 @@ export class UsersController {
   }
 
   @Get()
-  findMany(): Promise<Omit<UserEntity, 'password'>[]> {
+  findMany(): Promise<Partial<UserEntity>[]> {
     return this.usersService.findManyUser();
   }
 
@@ -83,7 +83,7 @@ export class UsersController {
   @Delete(':id')
   deleteById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<Omit<UserEntity, 'password'>> {
+  ): Promise<Partial<UserEntity>> {
     return this.usersService.deleteUser({ where: { id } });
   }
 }

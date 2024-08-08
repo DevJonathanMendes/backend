@@ -34,7 +34,7 @@ export class UsersService {
     });
   }
 
-  findManyUser(): Promise<Omit<UserEntity, 'password'>[]> {
+  findManyUser(): Promise<Partial<UserEntity>[]> {
     return this.prisma.user.findMany({
       select: { id: true, username: true, password: false },
     });
@@ -68,7 +68,7 @@ export class UsersService {
 
   deleteUser(params: {
     where: Prisma.UserWhereUniqueInput;
-  }): Promise<Omit<UserEntity, 'password'>> {
+  }): Promise<Partial<UserEntity>> {
     const { where } = params;
 
     return this.prisma.user.delete({
