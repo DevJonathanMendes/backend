@@ -12,27 +12,39 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
 
-    if (err instanceof PrismaClientKnownRequestError && err.code === 'P2021') {
-      const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      return res.status(statusCode).json({
-        message: [`The table ${err?.meta.modelName} does not exist.`],
-        error: 'Internal Server Error',
-        statusCode,
-      });
-    }
-
-    if (err instanceof PrismaClientKnownRequestError && err.code === 'P2025') {
-      if (err?.meta.cause.includes('delete')) {
-        return res.status(HttpStatus.OK).end();
-      }
-
-      if (err?.meta.cause.includes('update')) {
+    console.log(err);
+    if (err instanceof PrismaClientKnownRequestError) {
+      if (err.code === 'P2000') {
         const statusCode = HttpStatus.BAD_REQUEST;
         return res.status(statusCode).json({
-          message: ['The user does not exist'],
+          message: [`The value provided for the column is too long.`],
           error: 'Bad Request',
           statusCode,
         });
+      }
+
+      if (err.code === 'P2021') {
+        const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        return res.status(statusCode).json({
+          message: [`The table ${err?.meta.modelName} does not exist.`],
+          error: 'Internal Server Error',
+          statusCode,
+        });
+      }
+
+      if (err.code === 'P2025') {
+        if (err?.meta.cause.includes('delete')) {
+          return res.status(HttpStatus.OK).end();
+        }
+
+        if (err?.meta.cause.includes('update')) {
+          const statusCode = HttpStatus.BAD_REQUEST;
+          return res.status(statusCode).json({
+            message: ['The user does not exist'],
+            error: 'Bad Request',
+            statusCode,
+          });
+        }
       }
     }
 
@@ -45,7 +57,6 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
       });
     }
 
-    console.log(err);
     const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     return res.status(statusCode).json({
       message: ['Something unexpected happened in the database'],
