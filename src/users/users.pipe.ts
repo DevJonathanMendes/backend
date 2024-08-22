@@ -7,38 +7,32 @@ export class UsersPipeTransform implements PipeTransform {
   transform(data: Record<string, any>) {
     const sanitizedData: Record<string, any> = {};
 
-    if (typeof data === 'object') {
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'password') {
-          sanitizedData[key] = this.passwordHash(value);
-        } else {
-          sanitizedData[key] = this.sanitizeValue(value);
-        }
-      });
+    if (typeof data !== 'object' || data === null) return data;
 
-      return sanitizedData;
-    }
-
-    return data;
-  }
-
-  private sanitizeValue(value: string): string {
-    if (typeof value === 'string') {
-      value = value.replace(/\s{2,}(?![\d\s]*$)/g, ' ').trim();
-
-      if (isEmail(value)) {
-        value = value.toLowerCase();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'username' || isEmail(value)) {
+        return (sanitizedData[key] = value.toLowerCase());
       }
-    }
 
-    return value;
+      if (key === 'password') {
+        return (sanitizedData[key] = this.passwordHash(value));
+      }
+
+      if (typeof value === 'string') {
+        return (sanitizedData[key] = value
+          .replace(/\s{2,}(?![\d\s]*$)/g, ' ')
+          .trim());
+      }
+    });
+
+    return sanitizedData;
   }
 
   private passwordHash(password: string) {
-    if (password.length < 1) return undefined;
-
-    return createHash('sha256')
-      .update(password + process.env.JWT_SECRET)
-      .digest('hex');
+    return password.length > 0
+      ? createHash('sha256')
+          .update(password + process.env.JWT_SECRET)
+          .digest('hex')
+      : undefined;
   }
 }

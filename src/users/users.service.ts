@@ -13,14 +13,14 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  createToken = (
+  createToken(
     user: Partial<UserEntity>,
-  ): Partial<UserEntity> & { token: string } => {
+  ): Partial<UserEntity> & { token: string } {
     return {
       ...user,
       token: this.jwtService.sign({ ...user }),
     };
-  };
+  }
 
   createUser(params: {
     data: CreateUserDto;
@@ -30,13 +30,27 @@ export class UsersService {
 
     return this.prisma.user.create({
       data,
-      select: { id: true, username: true, ...select },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        surname: true,
+        title: true,
+        about: true,
+        ...select,
+      },
     });
   }
 
   findManyUser(): Promise<Partial<UserEntity>[]> {
     return this.prisma.user.findMany({
-      select: { id: true, username: true, password: false },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        surname: true,
+        password: false,
+      },
     });
   }
 
@@ -48,7 +62,15 @@ export class UsersService {
 
     return this.prisma.user.findUnique({
       where,
-      select: { id: true, username: true, ...select },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        surname: true,
+        title: true,
+        about: true,
+        ...select,
+      },
     });
   }
 
@@ -62,7 +84,7 @@ export class UsersService {
     return this.prisma.user.update({
       data,
       where,
-      select: { id: true, username: true, ...select },
+      select: { id: true, ...select },
     });
   }
 

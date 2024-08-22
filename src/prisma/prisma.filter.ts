@@ -40,7 +40,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         if (err?.meta.cause.includes('update')) {
           const statusCode = HttpStatus.BAD_REQUEST;
           return res.status(statusCode).json({
-            message: ['The user does not exist'],
+            message: ['user does not exist'],
             error: 'Bad Request',
             statusCode,
           });

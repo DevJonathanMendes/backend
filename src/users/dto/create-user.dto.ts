@@ -12,6 +12,14 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
+  @Length(1, 255)
+  name: string;
+
+  @IsString()
+  @Length(1, 255)
+  surname: string;
+
+  @IsString()
   @IsOptional()
   @Length(1, 255)
   title: string;

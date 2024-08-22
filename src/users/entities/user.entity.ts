@@ -5,6 +5,9 @@ export class UserEntity implements User {
   username: string;
   password: string;
 
+  name: string;
+  surname: string;
+
   title: string;
   about: string;
 }
