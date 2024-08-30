@@ -32,23 +32,26 @@ export class UsersService {
       data,
       select: {
         id: true,
+        email: true,
         username: true,
         name: true,
-        surname: true,
-        title: true,
-        about: true,
         ...select,
       },
     });
   }
 
-  findManyUser(): Promise<Partial<UserEntity>[]> {
+  findManyUser(
+    params: { where?: Prisma.UserWhereInput } = {},
+  ): Promise<Partial<UserEntity>[]> {
+    const { where } = params;
+
     return this.prisma.user.findMany({
+      where,
       select: {
         id: true,
+        email: true,
         username: true,
         name: true,
-        surname: true,
         password: false,
       },
     });
@@ -64,11 +67,9 @@ export class UsersService {
       where,
       select: {
         id: true,
+        email: true,
         username: true,
         name: true,
-        surname: true,
-        title: true,
-        about: true,
         ...select,
       },
     });

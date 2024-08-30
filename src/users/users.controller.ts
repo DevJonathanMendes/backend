@@ -25,6 +25,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  //
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
@@ -48,18 +49,22 @@ export class UsersController {
     return this.usersService.createToken(user);
   }
 
+  //
   @Public()
   @Post('signup')
   async signUp(
     @Body() data: CreateUserDto,
   ): Promise<Partial<UserEntity> & { token: string }> {
-    const usernameExists = await this.usersService.findUniqueUser({
-      where: { username: data.username },
+    const exists = await this.usersService.findManyUser({
+      where: { OR: [{ username: data.username }, { email: data.email }] },
     });
 
-    if (usernameExists) {
-      throw new BadRequestException(['username already exists']);
-    }
+    const errors = exists.reduce((acc: string[], { username, email }) => {
+      username === data.username && acc.push('username already exists');
+      email === data.email && acc.push('email already exists');
+      return acc;
+    }, []);
+    if (errors.length) throw new BadRequestException(errors);
 
     const user = await this.usersService.createUser({ data });
     return this.usersService.createToken(user);

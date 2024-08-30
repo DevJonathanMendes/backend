@@ -1,13 +1,17 @@
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 // import { IsStrongPassword } from 'class-validator';
 
 export class CreateUserDto {
+  @IsEmail()
+  @Length(1, 255)
+  email: string;
+
   @IsString()
   @Length(1, 255)
   username: string;
 
+  // @IsStrongPassword() // Mais recomendado.
   @IsString()
-  // @IsStrongPassword() Mais recomendado.
   @Length(1, 255)
   password: string;
 
@@ -16,16 +20,7 @@ export class CreateUserDto {
   name: string;
 
   @IsString()
-  @Length(1, 255)
-  surname: string;
-
-  @IsString()
   @IsOptional()
   @Length(1, 255)
-  title: string;
-
-  @IsString()
-  @IsOptional()
-  @Length(1, 255)
-  about: string;
+  bio?: string;
 }

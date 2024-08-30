@@ -10,6 +10,10 @@ export class SelectFieldsUser
 
   @IsBooleanString()
   @IsOptional()
+  email: boolean;
+
+  @IsBooleanString()
+  @IsOptional()
   username: boolean;
 
   @IsBooleanString()
@@ -18,13 +22,13 @@ export class SelectFieldsUser
 
   @IsBooleanString()
   @IsOptional()
-  surname: boolean;
+  bio: boolean;
 
   @IsBooleanString()
   @IsOptional()
-  title: boolean;
+  createdAt: boolean;
 
   @IsBooleanString()
   @IsOptional()
-  about: boolean;
+  updatedAt: boolean;
 }
