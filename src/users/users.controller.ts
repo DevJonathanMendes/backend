@@ -25,7 +25,6 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  //
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
@@ -49,19 +48,19 @@ export class UsersController {
     return this.usersService.createToken(user);
   }
 
-  //
   @Public()
   @Post('signup')
   async signUp(
     @Body() data: CreateUserDto,
   ): Promise<Partial<UserEntity> & { token: string }> {
+    const { username, email } = data;
     const exists = await this.usersService.findManyUser({
-      where: { OR: [{ username: data.username }, { email: data.email }] },
+      where: { OR: [{ username }, { email }] },
     });
 
-    const errors = exists.reduce((acc: string[], { username, email }) => {
-      username === data.username && acc.push('username already exists');
-      email === data.email && acc.push('email already exists');
+    const errors = exists.reduce((acc: string[], user) => {
+      if (user.username === username) acc.push('username already exists');
+      if (user.email === email) acc.push('email already exists');
       return acc;
     }, []);
     if (errors.length) throw new BadRequestException(errors);
@@ -83,7 +82,7 @@ export class UsersController {
   ): Promise<Partial<UserEntity>> {
     const user = await this.usersService.findUniqueUser({
       where: { id },
-      select: this.createFindSelect(query),
+      select: this.createFindUniqueSelect(query),
     });
 
     if (!user) throw new BadRequestException(['id does not exist']);
@@ -99,7 +98,7 @@ export class UsersController {
   ): Promise<Partial<UserEntity>> {
     const user = await this.usersService.findUniqueUser({
       where: { username },
-      select: this.createFindSelect(query),
+      select: this.createFindUniqueSelect(query),
     });
 
     if (!user) throw new BadRequestException(['username does not exist']);
@@ -115,18 +114,31 @@ export class UsersController {
   ) {
     if (id !== req?.user.id) throw new UnauthorizedException(['not allowed']);
 
-    if (data?.username) {
-      const username = await this.usersService.findUniqueUser({
-        where: { username: data.username },
+    const { username, email } = data;
+    const select = this.createUpdateSelect(data);
+    const conditions: Partial<UpdateUserDto>[] = [];
+
+    username && conditions.push({ username });
+    email && conditions.push({ email });
+
+    if (conditions.length) {
+      const exists = await this.usersService.findManyUser({
+        where: { OR: conditions },
+        select,
       });
 
-      if (username) throw new BadRequestException(['username already exists']);
+      const errors = exists.reduce((acc: string[], user) => {
+        if (user.username === username) acc.push('username already exists');
+        if (user.email === email) acc.push('email already exists');
+        return acc;
+      }, []);
+      if (errors.length) throw new BadRequestException(errors);
     }
 
     return this.usersService.updateUser({
       data,
       where: { id },
-      select: this.createUpdateSelect(data),
+      select,
     });
   }
 
@@ -140,7 +152,7 @@ export class UsersController {
     return this.usersService.deleteUser({ where: { id } });
   }
 
-  private createFindSelect(select: SelectFieldsUser) {
+  private createFindUniqueSelect(select: SelectFieldsUser) {
     if (typeof select !== 'object' || select === null) return select;
 
     delete select.id;

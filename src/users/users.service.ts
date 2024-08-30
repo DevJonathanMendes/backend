@@ -41,9 +41,12 @@ export class UsersService {
   }
 
   findManyUser(
-    params: { where?: Prisma.UserWhereInput } = {},
+    params: {
+      where?: Prisma.UserWhereInput;
+      select?: Prisma.UserSelect;
+    } = {},
   ): Promise<Partial<UserEntity>[]> {
-    const { where } = params;
+    const { where, select } = params;
 
     return this.prisma.user.findMany({
       where,
@@ -52,6 +55,7 @@ export class UsersService {
         email: true,
         username: true,
         name: true,
+        ...select,
         password: false,
       },
     });
