@@ -18,11 +18,14 @@ export class UsersPipeTransform implements PipeTransform {
         return (sanitizedData[key] = this.passwordHash(value));
       }
 
-      if (typeof value === 'string') {
+      return (sanitizedData[key] = value);
+
+      // Remove espaços em branco duplicados.
+      /* if (typeof value === 'string') {
         return (sanitizedData[key] = value
           .replace(/\s{2,}(?![\d\s]*$)/g, ' ')
           .trim());
-      }
+      } */
     });
 
     return sanitizedData;

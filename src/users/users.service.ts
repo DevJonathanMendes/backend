@@ -71,9 +71,10 @@ export class UsersService {
       where,
       select: {
         id: true,
-        email: true,
         username: true,
+        email: true,
         name: true,
+        bio: true,
         ...select,
       },
     });
