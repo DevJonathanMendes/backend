@@ -6,29 +6,29 @@ export class SelectFieldsUser
 {
   @IsBooleanString()
   @IsOptional()
-  id: boolean;
+  id: boolean = true;
 
   @IsBooleanString()
   @IsOptional()
-  email: boolean;
+  email: boolean = true;
 
   @IsBooleanString()
   @IsOptional()
-  username: boolean;
+  username: boolean = true;
 
   @IsBooleanString()
   @IsOptional()
-  name: boolean;
+  name: boolean = true;
 
   @IsBooleanString()
   @IsOptional()
-  bio: boolean;
+  bio: boolean = true;
 
   @IsBooleanString()
   @IsOptional()
-  createdAt: boolean;
+  createdAt: boolean = true;
 
   @IsBooleanString()
   @IsOptional()
-  updatedAt: boolean;
+  updatedAt: boolean = true;
 }

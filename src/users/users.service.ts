@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -8,19 +7,7 @@ import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-  ) {}
-
-  createToken(
-    user: Partial<UserEntity>,
-  ): Partial<UserEntity> & { token: string } {
-    return {
-      ...user,
-      token: this.jwtService.sign({ ...user }),
-    };
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   createUser(params: {
     data: CreateUserDto;
@@ -28,37 +15,16 @@ export class UsersService {
   }): Promise<Partial<UserEntity>> {
     const { data, select } = params;
 
-    return this.prisma.user.create({
-      data,
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        name: true,
-        ...select,
-      },
-    });
+    return this.prisma.user.create({ data, select });
   }
 
-  findManyUser(
-    params: {
-      where?: Prisma.UserWhereInput;
-      select?: Prisma.UserSelect;
-    } = {},
-  ): Promise<Partial<UserEntity>[]> {
+  findManyUser(params: {
+    where?: Prisma.UserWhereInput;
+    select: Prisma.UserSelect;
+  }): Promise<Partial<UserEntity>[]> {
     const { where, select } = params;
 
-    return this.prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        name: true,
-        ...select,
-        password: false,
-      },
-    });
+    return this.prisma.user.findMany({ where, select });
   }
 
   findUniqueUser(params: {
@@ -67,17 +33,7 @@ export class UsersService {
   }): Promise<Partial<UserEntity>> {
     const { where, select } = params;
 
-    return this.prisma.user.findUnique({
-      where,
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        name: true,
-        bio: true,
-        ...select,
-      },
-    });
+    return this.prisma.user.findUnique({ where, select });
   }
 
   updateUser(params: {
@@ -87,21 +43,15 @@ export class UsersService {
   }) {
     const { data, where, select } = params;
 
-    return this.prisma.user.update({
-      data,
-      where,
-      select: { id: true, ...select },
-    });
+    return this.prisma.user.update({ data, where, select });
   }
 
   deleteUser(params: {
     where: Prisma.UserWhereUniqueInput;
+    select?: Prisma.UserSelect;
   }): Promise<Partial<UserEntity>> {
-    const { where } = params;
+    const { where, select } = params;
 
-    return this.prisma.user.delete({
-      where,
-      select: { id: true, username: true },
-    });
+    return this.prisma.user.delete({ where, select });
   }
 }

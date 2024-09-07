@@ -13,9 +13,23 @@ model User {
   username String @unique @db.VarChar(255)
   password String @db.VarChar(255)
 
+  // profilePicUrl String? @db.VarChar(255) 
   name String  @db.VarChar(255)
   bio  String? @db.Text
-  // profilePicUrl String? @db.VarChar(255) 
+
+  posts Post[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+model Post {
+  id       Int @id @default(autoincrement()) @db.Integer
+  authorId Int
+
+  author  User   @relation(fields: [authorId], references: [id])
+  title   String @db.VarChar(255)
+  content String @db.VarChar(255)
 
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
