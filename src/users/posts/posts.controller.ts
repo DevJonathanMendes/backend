@@ -1,34 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { CreatePostDto, CreatePostInput } from './dto/create-post.dto';
+import { PostEntity } from './entities/post.entity';
+import { PostsGuard } from './posts.guard';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 
-@Controller('posts')
+@UseGuards(PostsGuard)
+@Controller('users/:authorId/posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  create(
+    @Req() req: Request & { user: { id: number } },
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostEntity> {
+    const data: CreatePostInput = { ...createPostDto, authorId: req.user.id };
+
+    return this.postsService.create({ data });
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
+  findMany(@Param('authorId', ParseIntPipe) authorId: number) {
+    return this.postsService.findAll({ where: { authorId } });
   }
 }

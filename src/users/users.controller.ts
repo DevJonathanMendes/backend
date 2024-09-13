@@ -10,16 +10,16 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SelectFieldsUser } from './dto/select-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
+import { UserSelectEntity } from './entities/userSelect.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  private readonly defaultSelect = new SelectFieldsUser();
+  private readonly defaultSelect = new UserSelectEntity();
 
   @Get()
   findMany(): Promise<Partial<UserEntity>[]> {

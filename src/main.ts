@@ -7,11 +7,16 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   app.use(helmet());
   app.use(compression());
 
-  await app.listen(process.env.APP_PORT);
+  await app.listen(Number(process.env.APP_PORT));
 }
 bootstrap();

@@ -12,7 +12,7 @@ export class UsersService {
   createUser(params: {
     data: CreateUserDto;
     select?: Prisma.UserSelect;
-  }): Promise<Partial<UserEntity>> {
+  }): Promise<UserEntity> {
     const { data, select } = params;
 
     return this.prisma.user.create({ data, select });
@@ -21,7 +21,7 @@ export class UsersService {
   findManyUser(params: {
     where?: Prisma.UserWhereInput;
     select: Prisma.UserSelect;
-  }): Promise<Partial<UserEntity>[]> {
+  }): Promise<UserEntity[]> {
     const { where, select } = params;
 
     return this.prisma.user.findMany({ where, select });
@@ -30,7 +30,7 @@ export class UsersService {
   findUniqueUser(params: {
     where: Prisma.UserWhereUniqueInput;
     select?: Prisma.UserSelect;
-  }): Promise<Partial<UserEntity>> {
+  }): Promise<UserEntity | null> {
     const { where, select } = params;
 
     return this.prisma.user.findUnique({ where, select });
@@ -49,7 +49,7 @@ export class UsersService {
   deleteUser(params: {
     where: Prisma.UserWhereUniqueInput;
     select?: Prisma.UserSelect;
-  }): Promise<Partial<UserEntity>> {
+  }): Promise<UserEntity> {
     const { where, select } = params;
 
     return this.prisma.user.delete({ where, select });

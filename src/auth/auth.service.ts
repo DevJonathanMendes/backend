@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserEntity } from '../users/entities/user.entity';
+import { TokenEntity } from './entities/token.entity';
 
 @Injectable()
 export class AuthService {
@@ -30,16 +31,13 @@ export class AuthService {
       throw new UnauthorizedException(['incorrect password']);
     }
 
-    delete user.password;
-    return {
+    return new TokenEntity({
       ...user,
       token: this.jwtService.sign({ ...user }),
-    };
+    });
   }
 
-  async signUp(
-    data: CreateUserDto,
-  ): Promise<Partial<UserEntity> & { token: string }> {
+  async signUp(data: CreateUserDto) {
     const { username, email } = data;
     const exists = await this.prismaService.user.findMany({
       where: { OR: [{ username }, { email }] },
@@ -55,10 +53,9 @@ export class AuthService {
 
     const user = await this.prismaService.user.create({ data });
 
-    delete user.password;
-    return {
+    return new TokenEntity({
       ...user,
       token: this.jwtService.sign({ ...user }),
-    };
+    });
   }
 }
