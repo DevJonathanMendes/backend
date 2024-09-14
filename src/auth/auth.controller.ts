@@ -10,6 +10,7 @@ import {
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
+import { AuthUserDto } from './dto/auth-user.dto';
 
 @Public()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -19,7 +20,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('signin')
-  signIn(@Body() data: Pick<CreateUserDto, 'username' | 'password'>) {
+  signIn(@Body() data: AuthUserDto) {
     return this.authService.signIn(data);
   }
 

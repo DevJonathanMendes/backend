@@ -1,4 +1,4 @@
-import { IsNumber, IsString, Length } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { PostEntity } from '../entities/post.entity';
 
 export class CreatePostDto

@@ -59,31 +59,11 @@ export class UsersController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
-  ) {
+  ): Promise<Partial<UserEntity>> {
     if (id !== req?.user.id) throw new UnauthorizedException(['not allowed']);
 
-    const { username, email } = data;
-    const conditions: Partial<UpdateUserDto>[] = [];
-
-    username && conditions.push({ username });
-    email && conditions.push({ email });
-
-    if (conditions.length) {
-      const exists = await this.usersService.findManyUser({
-        where: { OR: conditions },
-        select: this.defaultSelect,
-      });
-
-      const errors = exists.reduce((acc: string[], user) => {
-        if (user.username === username) acc.push('username already exists');
-        if (user.email === email) acc.push('email already exists');
-        return acc;
-      }, []);
-      if (errors.length) throw new BadRequestException(errors);
-    }
-
     return this.usersService.updateUser({
-      data,
+      data: { ...data, id },
       where: { id },
       select: this.defaultSelect,
     });

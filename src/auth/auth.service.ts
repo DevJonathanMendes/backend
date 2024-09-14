@@ -4,22 +4,21 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
+import { createHash } from 'crypto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { UserEntity } from '../users/entities/user.entity';
-import { TokenEntity } from './entities/token.entity';
+import { UsersService } from '../users/users.service';
+import { AuthUserDto } from './dto/auth-user.dto';
+import { UserTokenEntity } from './entities/token-user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prismaService: PrismaService,
-    private jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(
-    data: Pick<CreateUserDto, 'username' | 'password'>,
-  ): Promise<Partial<UserEntity> & { token: string }> {
-    const user = await this.prismaService.user.findUnique({
+  async signIn(data: AuthUserDto): Promise<UserTokenEntity> {
+    const user = await this.usersService.findUniqueUser({
       where: { username: data.username },
     });
 
@@ -27,35 +26,30 @@ export class AuthService {
       throw new BadRequestException(['username does not exist']);
     }
 
-    if (user.password !== data.password) {
+    if (user.password !== this.passwordHash(data.password)) {
       throw new UnauthorizedException(['incorrect password']);
     }
 
-    return new TokenEntity({
+    return new UserTokenEntity({
       ...user,
       token: this.jwtService.sign({ ...user }),
     });
   }
 
-  async signUp(data: CreateUserDto) {
-    const { username, email } = data;
-    const exists = await this.prismaService.user.findMany({
-      where: { OR: [{ username }, { email }] },
-      select: { username: true, email: true },
-    });
+  async signUp(data: CreateUserDto): Promise<UserTokenEntity> {
+    data.password = this.passwordHash(data.password);
 
-    const errors = exists.reduce((acc: string[], user) => {
-      if (user.username === username) acc.push('username already exists');
-      if (user.email === email) acc.push('email already exists');
-      return acc;
-    }, []);
-    if (errors.length) throw new BadRequestException(errors);
+    const user = await this.usersService.createUser({ data });
 
-    const user = await this.prismaService.user.create({ data });
-
-    return new TokenEntity({
+    return new UserTokenEntity({
       ...user,
       token: this.jwtService.sign({ ...user }),
     });
+  }
+
+  private passwordHash(password: string): string {
+    return createHash('sha256')
+      .update(password + process.env.JWT_SECRET)
+      .digest('hex');
   }
 }

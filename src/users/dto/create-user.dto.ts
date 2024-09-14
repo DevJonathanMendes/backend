@@ -1,21 +1,30 @@
 import {
   IsEmail,
+  IsLowercase,
   IsOptional,
   IsString,
   Length,
   Matches,
 } from 'class-validator';
-// import { IsStrongPassword } from 'class-validator';
+import { UserEntity } from '../entities/user.entity';
+import { Transform } from 'class-transformer';
 
-export class CreateUserDto {
+export class CreateUserDto
+  implements Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>
+{
   @IsEmail()
-  @Matches(/^\S*$/, { message: 'email must not contain spaces' })
+  @IsLowercase()
   @Length(1, 255)
+  @Transform((e) => {
+    console.log(e);
+    return e.value;
+  })
   email: string;
 
   @IsString()
-  @Matches(/^\S*$/, { message: 'username must not contain spaces' })
+  @IsLowercase()
   @Length(1, 255)
+  @Matches(/^\S*$/, { message: 'username must not contain spaces' })
   username: string;
 
   // @IsStrongPassword() // Mais recomendado.
@@ -28,7 +37,7 @@ export class CreateUserDto {
   name: string;
 
   @IsString()
-  @IsOptional()
   @Length(1, 255)
-  bio?: string;
+  @IsOptional()
+  bio: string | null;
 }
