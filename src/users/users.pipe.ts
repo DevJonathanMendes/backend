@@ -1,21 +1,17 @@
-import { Injectable, PipeTransform } from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { isEmail } from 'class-validator';
-import { createHash } from 'crypto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
-export class UsersPipeTransform implements PipeTransform {
-  transform(data: Record<string, any>) {
-    const sanitizedData: Record<string, any> = {};
-
+class UsersPipeTransform implements PipeTransform {
+  transform(data: CreateUserDto, { metatype }: ArgumentMetadata) {
     if (typeof data !== 'object' || data === null) return data;
+
+    const sanitizedData: Record<string, any> = {};
 
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'username' || isEmail(value)) {
         return (sanitizedData[key] = value.toLowerCase());
-      }
-
-      if (key === 'password') {
-        return (sanitizedData[key] = this.passwordHash(value));
       }
 
       return (sanitizedData[key] = value);
@@ -29,13 +25,5 @@ export class UsersPipeTransform implements PipeTransform {
     });
 
     return sanitizedData;
-  }
-
-  private passwordHash(password: string) {
-    return password.length > 0
-      ? createHash('sha256')
-          .update(password + process.env.JWT_SECRET)
-          .digest('hex')
-      : undefined;
   }
 }
