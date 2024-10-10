@@ -12,7 +12,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
 
-    console.log(err);
+    console.error(err);
     if (err instanceof PrismaClientKnownRequestError) {
       if (err.code === 'P2000') {
         const statusCode = HttpStatus.BAD_REQUEST;

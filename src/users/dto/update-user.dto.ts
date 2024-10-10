@@ -1,26 +1,36 @@
-import { PartialType } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
-import { CreateUserDto } from './create-user.dto';
+import {
+  IsEmail,
+  IsLowercase,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
+import { UserEntity } from '../entities/user.entity';
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {
+export class UpdateUserDto
+  implements Omit<UserEntity, 'id' | 'password' | 'createdAt' | 'updatedAt'>
+{
+  @IsEmail()
+  @IsLowercase()
+  @Length(1, 255)
   @IsOptional()
-  id: number;
+  email: string;
 
+  @IsString()
+  @IsLowercase()
+  @Length(1, 255)
+  @Matches(/^\S*$/, { message: 'username must not contain spaces' })
   @IsOptional()
   username: string;
 
-  @IsOptional()
-  password: string;
-
+  @IsString()
+  @Length(1, 255)
   @IsOptional()
   name: string;
 
+  @IsString()
+  @Length(1, 255)
   @IsOptional()
-  surname: string;
-
-  @IsOptional()
-  title: string;
-
-  @IsOptional()
-  about: string;
+  bio: string | null;
 }
