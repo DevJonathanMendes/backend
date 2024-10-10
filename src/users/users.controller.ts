@@ -11,8 +11,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserSelectEntity } from './entities/user-select.entity';
 import { UserEntity } from './entities/user.entity';
-import { UserSelectEntity } from './entities/userSelect.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')
