@@ -3,29 +3,31 @@ import {
   ClassSerializerInterceptor,
   Controller,
   HttpCode,
-  HttpStatus,
   Post,
+  SerializeOptions,
   UseInterceptors,
 } from '@nestjs/common';
+import { HttpStatusCode } from 'axios';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UsersEntity } from '../users/entities/users.entity';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { AuthUserDto } from './dto/auth-user.dto';
 
 @Public()
 @UseInterceptors(ClassSerializerInterceptor)
+@SerializeOptions({ type: UsersEntity })
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
-  @Post('signin')
-  signIn(@Body() data: AuthUserDto) {
-    return this.authService.signIn(data);
+  @HttpCode(HttpStatusCode.Ok)
+  @Post('sign-in')
+  signIn(@Body() createUserDto: CreateUserDto) {
+    return this.authService.signIn(createUserDto);
   }
 
-  @Post('signup')
-  signUp(@Body() data: CreateUserDto) {
-    return this.authService.signUp(data);
+  @Post('sign-up')
+  signUp(@Body() createUserDto: CreateUserDto) {
+    return this.authService.signUp(createUserDto);
   }
 }

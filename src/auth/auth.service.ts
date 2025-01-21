@@ -1,14 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { createHash } from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
-import { AuthUserDto } from './dto/auth-user.dto';
-import { UserTokenEntity } from './entities/token-user.entity';
 
 @Injectable()
 export class AuthService {
@@ -17,39 +11,23 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(data: AuthUserDto): Promise<UserTokenEntity> {
-    const user = await this.usersService.findUniqueUser({
-      where: { username: data.username },
-    });
+  async signIn(createUserDto: CreateUserDto) {
+    const user = await this.usersService.findOneUserByEmail(createUserDto.email);
 
-    if (!user) {
-      throw new BadRequestException(['username does not exist']);
-    }
+    if (!user || !(await bcrypt.compare(createUserDto.password, user.password)))
+      throw new UnauthorizedException(['Invalid credentials']);
 
-    if (user.password !== this.passwordHash(data.password)) {
-      throw new UnauthorizedException(['incorrect password']);
-    }
-
-    return new UserTokenEntity({
-      ...user,
-      token: this.jwtService.sign({ ...user }),
-    });
+    const { id, email } = user;
+    return {
+      id,
+      email,
+      accessToken: this.jwtService.sign({ id, email }, { expiresIn: '5min' }),
+    };
   }
 
-  async signUp(data: CreateUserDto): Promise<UserTokenEntity> {
-    data.password = this.passwordHash(data.password);
+  async signUp(createUserDto: CreateUserDto) {
+    createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
-    const user = await this.usersService.createUser({ data });
-
-    return new UserTokenEntity({
-      ...user,
-      token: this.jwtService.sign({ ...user }),
-    });
-  }
-
-  private passwordHash(password: string): string {
-    return createHash('sha256')
-      .update(password + process.env.JWT_SECRET)
-      .digest('hex');
+    return this.usersService.createUser(createUserDto);
   }
 }

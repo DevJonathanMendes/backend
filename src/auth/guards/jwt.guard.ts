@@ -1,8 +1,4 @@
-import {
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
@@ -26,10 +22,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
-      throw new UnauthorizedException([
-        'Unable to validate authentication token',
-        info.message,
-      ]);
+      if (info?.message === 'No auth token' || info?.message === 'jwt malformed') {
+        throw new UnauthorizedException('Authentication token is missing or malformed');
+      }
+
+      if (!user) {
+        throw new UnauthorizedException('User not found or token invalid');
+      }
+
+      throw new UnauthorizedException('Unable to validate authentication token');
     }
 
     return user;

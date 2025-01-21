@@ -1,9 +1,6 @@
 # Pnpm Lock
 pnpm-lock.yaml
 
-# Prisma Migrations
-prisma/migrations
-
 # Compiled Output
 /dist
 /node_modules
