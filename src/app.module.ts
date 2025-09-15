@@ -23,6 +23,7 @@ import { UsersModule } from './users/users.module';
           password: configService.getOrThrow<string>('POSTGRES_PASSWORD'),
           entities: [UsersEntity],
           autoLoadEntities: true,
+          // dropSchema: true,
           synchronize: true,
         };
       },
